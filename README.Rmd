@@ -1,0 +1,69 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# stigmaR
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of stigmaR is to measure and calculate structural stigma.
+
+<div style="border: 2px solid #2563eb; border-radius: 8px; padding: 1.5rem; margin: 2rem 0; background-color: #ffffff;">
+  <h4 style="color: #1e40af; margin-top: 0; margin-bottom: 0.75rem;">
+    💬 Community & Support
+  </h4>
+  <p style="color: #475569; margin-bottom: 0.5rem;">
+    Have questions, ideas, or need help?
+  </p>
+  <p style="margin-bottom: 0;">
+    <a href="https://github.com/follhim/stigmaR/discussions" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+      Join the discussion board →
+    </a>
+  </p>
+</div>
+
+## Installation
+
+You can install the development version of stigmaR from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("pak")
+pak::pak("follhim/stigmaR")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(stigmaR)
+## basic example code
+```
+
+What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+
+```{r cars}
+summary(cars)
+```
+
+You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+
+You can also embed plots, for example:
+
+```{r pressure, echo = FALSE}
+plot(pressure)
+```
+
+In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
