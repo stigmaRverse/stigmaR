@@ -2,3 +2,26 @@ url: https://follhim.github.io/stigmaR/
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left:  [intro, articles, roadmap, community, about, reference]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Getting Started
+        href: articles/getting-started.html
+      # Add more vignettes here as you create them
+
+    roadmap:
+      text: Roadmap
+      href: articles/roadmap.html
+
+    about:
+      text: About
+      href: articles/about.html
+
+    community:
+      text: Community & Support
+      href: https://github.com/follhim/stigmaR/discussions
