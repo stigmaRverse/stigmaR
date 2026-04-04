@@ -3,4 +3,4 @@
 ## All functions
 
 - [`stigmaR()`](https://follhim.github.io/stigmaR/reference/stigmaR.md)
-  : Calculate State-Level Stigma Scores
+  : Calculate State-Level Stigma Scores from IAT Data

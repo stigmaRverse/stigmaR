@@ -1,71 +1,81 @@
-# Calculate State-Level Stigma Scores
+# Calculate State-Level Stigma Scores from IAT Data
 
-Merges state-level structural stigma indicators into your dataset based
-on Movement Advancement Project (MAP) policy data.
+Merges state- and year-level stigma indices derived from Project
+Implicit IAT data into your dataset. New columns are added in the format
+`YYYY_index`.
 
 ## Usage
 
 ``` r
-stigmaR(df, state_name, indicator, new_var)
+stigmaR(df, state, index, year, min_n = 30)
 ```
 
 ## Arguments
 
 - df:
 
-  A data frame containing your data
+  A data frame containing your data.
 
-- state_name:
+- state:
 
-  Character string specifying the column name in `df` that contains
-  state abbreviations (e.g., "IL", "CA")
+  Character string. Name of the column in `df` containing two-letter
+  state abbreviations (e.g., "IL", "CA").
 
-- indicator:
+- index:
 
-  Character string specifying which stigma indicator to use. Options
+  Character vector. One or more composite indices to merge in. Options
   are:
 
-  - `"map_total"`: Total stigma score across all policies
+  - `"implicit"`: IAT D-score (implicit pro-straight bias)
 
-  - `"map_sex"`: Sexual orientation-specific policies only
+  - `"explicit_therm"`: Average of gay men + gay women feeling
+    thermometers (reversed so higher = more stigma)
 
-  - `"map_gender"`: Gender identity-specific policies only
+  - `"explicit_pol"`: Average of policy opposition items (marriage
+    rights, relations legality, adoption, service refusal, transgender
+    bathroom)
 
-- new_var:
+  - `"explicit_bel"`: Belief that sexuality is environmental rather than
+    innate
 
-  Character string specifying the name of the new variable to create in
-  `df` containing the stigma scores
+  - `"explicit"`: Average across all explicit indices (therm + pol +
+    bel)
+
+- year:
+
+  Character vector. Years to merge in (e.g., `c("2015", "2016")`). Each
+  year x index combination becomes one new column named `YYYY_index`.
+
+- min_n:
+
+  Integer. Minimum IAT respondents required per state-year cell. Cells
+  below this threshold are set to NA. Default is 30.
 
 ## Value
 
-The input data frame `df` with an additional column containing
-state-level stigma scores. Unmatched states will have NA values.
+The input data frame with new columns named `YYYY_index` containing
+matched state-level stigma scores for each requested year and index.
 
-## Details
+## References
 
-This function matches state abbreviations in your data to pre-calculated
-stigma scores based on MAP policy data. States not found in the
-reference data will be assigned NA and a warning will be displayed
-showing which states were not matched.
+Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing Accessibility,
+Reproducibility, and Transparency of Structural Stigma Research.
+
+Greenwald, A. G., Nosek, B. A., & Banaji, M. R. (2003). Understanding
+and using the Implicit Association Test: I. An improved scoring
+algorithm. *Journal of Personality and Social Psychology*, 85(2),
+197–216. https://doi.org/10.1037/0022-3514.85.2.197
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-# Add total stigma scores
-my_data <- stigmaR(
-  df = my_data,
-  state_name = "state",
-  indicator = "map_total",
-  new_var = "stigma_score"
+new_df <- stigmaR(
+  df    = my_data,
+  state = "state_abbrev",
+  index = c("implicit", "explicit_pol"),
+  year  = c("2015", "2016")
 )
-
-# Add sexual orientation-specific scores
-my_data <- stigmaR(
-  df = my_data,
-  state_name = "state_abbrev",
-  indicator = "map_sex",
-  new_var = "so_stigma"
-)
+# Adds columns: 2015_implicit, 2016_implicit, 2015_explicit_pol, 2016_explicit_pol
 } # }
 ```
