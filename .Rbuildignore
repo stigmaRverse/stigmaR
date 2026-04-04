@@ -1,9 +1,22 @@
-^stigmaR\.Rproj$
+# Standard R/RStudio files
+^.*\.Rproj$
 ^\.Rproj\.user$
+
+# pkgdown website (built docs)
+^docs$
+^_pkgdown\.yml$
 ^LICENSE\.md$
 ^\.github$
-^_pkgdown\.yml$
-^docs$
-^pkgdown$
+
+# Data processing pipeline (scripts only; composite.rda and items.rda ARE included)
+^data/process$
+^data/raw$
+^data/clean$
+^data/final$
+
+# Project documentation (not part of package)
+^codebook$
+^CLAUDE\.md$
+
+# README source (only README.md is included, not the Rmd source)
 ^README\.Rmd$
-^data-raw$

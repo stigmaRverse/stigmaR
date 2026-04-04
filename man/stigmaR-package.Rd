@@ -5,7 +5,7 @@
 \alias{stigmaR-package}
 \title{stigmaR: Measuring and calculating structural stigma}
 \description{
-What the package does (one paragraph).
+Provides researchers with pre-computed, state-level structural stigma scores derived from Project Implicit's Implicit Association Test (IAT) public dataset. Users can merge sexuality-related stigma indices— including implicit bias, explicit attitudes, policy opposition, and belief items—into their own data frames using a single function call, with built-in coverage reporting and respondent-count filtering.
 }
 \seealso{
 Useful links:
