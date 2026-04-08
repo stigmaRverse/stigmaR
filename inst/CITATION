@@ -1,0 +1,13 @@
+citHeader("To cite stigmaR in publications, please use:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "stigmaR: State-Level Structural Stigma Scores from IAT Data",
+  author   = c(
+    person("Seungju", "Kim"),
+    person("Noel R.", "Todd")
+  ),
+  year     = "2027",
+  note     = "R package",
+  url      = "https://github.com/follhim/stigmaR"
+)
