@@ -2,12 +2,12 @@
 
 Merges state- and year-level stigma indices derived from Project
 Implicit IAT data into your dataset. New columns are added in the format
-`YYYY_index`.
+`YYYY_iat_sex_index`.
 
 ## Usage
 
 ``` r
-stigmaR(df, state, index, year, min_n = 30)
+stigmaR(df, state, index, year)
 ```
 
 ## Arguments
@@ -26,35 +26,30 @@ stigmaR(df, state, index, year, min_n = 30)
   Character vector. One or more composite indices to merge in. Options
   are:
 
-  - `"implicit"`: IAT D-score (implicit pro-straight bias)
+  - `"iat_sex_implicit"`: IAT D-score (implicit pro-straight bias;
+    higher = more stigma)
 
-  - `"explicit_therm"`: Average of gay men + gay women feeling
-    thermometers (reversed so higher = more stigma)
+  - `"iat_sex_explicit_therm"`: Average of gay men + lesbian women
+    feeling thermometers (reversed so higher = more stigma)
 
-  - `"explicit_pol"`: Average of policy opposition items (marriage
-    rights, relations legality, adoption, service refusal, transgender
-    bathroom)
+  - `"iat_sex_explicit_pol"`: Average of policy opposition items
+    (marriage rights, relations legality, adoption, service refusal,
+    transgender bathroom)
 
-  - `"explicit_bel"`: Belief that sexuality is environmental rather than
-    innate
-
-  - `"explicit"`: Average across all explicit indices (therm + pol +
-    bel)
+  - `"iat_sex_explicit"`: Omnibus average across all explicit items
+    (therm + pol)
 
 - year:
 
-  Character vector. Years to merge in (e.g., `c("2015", "2016")`). Each
-  year x index combination becomes one new column named `YYYY_index`.
-
-- min_n:
-
-  Integer. Minimum IAT respondents required per state-year cell. Cells
-  below this threshold are set to NA. Default is 30.
+  Character vector. Years to merge in (e.g., `c("2016", "2017")`). Each
+  year x index combination becomes one new column named
+  `YYYY_iat_sex_index`. Data are available from 2016 onward.
 
 ## Value
 
-The input data frame with new columns named `YYYY_index` containing
-matched state-level stigma scores for each requested year and index.
+The input data frame with new columns named `YYYY_iat_sex_index`
+containing matched state-level stigma scores for each requested year and
+index.
 
 ## References
 
@@ -73,9 +68,10 @@ if (FALSE) { # \dontrun{
 new_df <- stigmaR(
   df    = my_data,
   state = "state_abbrev",
-  index = c("implicit", "explicit_pol"),
-  year  = c("2015", "2016")
+  index = c("iat_sex_implicit", "iat_sex_explicit_pol"),
+  year  = c("2016", "2017")
 )
-# Adds columns: 2015_implicit, 2016_implicit, 2015_explicit_pol, 2016_explicit_pol
+# Adds columns: 2016_iat_sex_implicit, 2017_iat_sex_implicit,
+#               2016_iat_sex_explicit_pol, 2017_iat_sex_explicit_pol
 } # }
 ```
