@@ -1,8 +1,15 @@
 # 02_iat_sexuality.R
-# Purpose: Raw IAT sexuality files → item means → composite indices
+# Purpose: Raw IAT sexuality files (2016–2025) → item means → composite indices
 # Outputs:
-#   data/clean/iat_sexuality_items.Rds    (state × year, all piat_ items + n_)
-#   data/clean/iat_sexuality_indices.Rds  (state × year, composite scores + n_)
+#   data/clean/iat_sexuality_items.Rds    (state × year, all iat_sex_ items + iat_sex_n_ counts)
+#   data/clean/iat_sexuality_indices.Rds  (state × year, composite scores only — no n_ columns)
+#
+# NOTE: 2015 is excluded — it uses a different variable set (no adoptchild,
+#   serverights, transgender, marriagerights_3num, relationslegal_3num).
+#
+# NOTE: iat_sex_explicit_bel (belief that sexuality is environmental) is not
+#   included — the source variable (sexualityorigin) does not appear in any
+#   Project Implicit sexuality IAT public dataset file from 2016 onward.
 
 pacman::p_load(tidyverse, here, readr, haven)
 
@@ -16,13 +23,18 @@ us_states_dc <- c(
   "VT","VA","WA","WV","WI","WY"
 )
 
-# ── Read all raw files ────────────────────────────────────────────────────────
+# ── Read all raw files (exclude 2015) ────────────────────────────────────────
 csv_files <- list.files(folder_path, pattern = "\\.csv$", full.names = TRUE, recursive = TRUE)
 sav_files <- list.files(folder_path, pattern = "\\.sav$", full.names = TRUE, recursive = TRUE)
 
+# Drop 2015 — variable structure is incompatible with 2016+
+csv_files <- csv_files[!grepl("2015", csv_files)]
+
 all_files <- c(
-  set_names(map(csv_files, read_csv), tools::file_path_sans_ext(basename(csv_files))),
-  set_names(map(sav_files, read_sav), tools::file_path_sans_ext(basename(sav_files)))
+  set_names(map(csv_files, read_csv, show_col_types = FALSE),
+            tools::file_path_sans_ext(basename(csv_files))),
+  set_names(map(sav_files, read_sav),
+            tools::file_path_sans_ext(basename(sav_files)))
 )
 
 # ── Helper: safely grab a column or return NAs ───────────────────────────────
@@ -39,89 +51,73 @@ clean_one_year <- function(df) {
   df |>
     filter(!is.na(state)) |>
     mutate(
-      # Implicit ---------------------------------------------------------------
-      piat_imp_straight_good     = grab(pick(everything()), "d_biep.straight_good_all"),
+      # Implicit -------------------------------------------------------------------
+      # D-score: higher = stronger pro-straight (anti-gay) implicit bias
+      iat_sex_imp_d         = grab(pick(everything()), "d_biep.straight_good_all"),
 
-      # Explicit: Attitude -----------------------------------------------------
-      piat_exp_att_straight_pref = grab(pick(everything()), "att_7"),
+      # Explicit: Attitude ---------------------------------------------------------
+      # 7-point scale; higher = more positive toward straight (more stigma)
+      iat_sex_exp_att       = grab(pick(everything()), "att_7"),
 
-      # Explicit: Thermometer (reversed: higher = more stigma) ----------------
-      piat_exp_therm_gaymen   = 10 - grab(pick(everything()), "tgaymen"),
-      piat_exp_therm_gaywomen = 10 - coalesce(
+      # Explicit: Thermometers (reversed: higher = more stigma) ------------------
+      # tgayleswomen used 2017+; tgaywomen present in 2016 as fallback
+      iat_sex_exp_therm_gm  = 10 - grab(pick(everything()), "tgaymen"),
+      iat_sex_exp_therm_gw  = 10 - coalesce(
         grab(pick(everything()), "tgayleswomen"),
         grab(pick(everything()), "tgaywomen")
       ),
 
-      # Explicit: Policy (0 = low stigma, 1 = high stigma, NA = no opinion) ---
-      piat_exp_pol_marriagerights = coalesce(
-        case_when(
-          grab(pick(everything()), "marriagerights_3num") == 1 ~ 0,
-          grab(pick(everything()), "marriagerights_3num") == 2 ~ 1,
-          grab(pick(everything()), "marriagerights_3num") == 3 ~ NA_real_
-        ),
-        case_when(
-          grab(pick(everything()), "marriagerights_3") == 0 ~ 1,
-          grab(pick(everything()), "marriagerights_3") == 1 ~ 0,
-          grab(pick(everything()), "marriagerights_3") == 2 ~ NA_real_
-        )
+      # Explicit: Policy (0 = low stigma, 1 = high stigma) ----------------------
+      iat_sex_exp_pol_marr  = case_when(
+        grab(pick(everything()), "marriagerights_3num") == 1 ~ 0,   # support
+        grab(pick(everything()), "marriagerights_3num") == 2 ~ 1,   # oppose
+        grab(pick(everything()), "marriagerights_3num") == 3 ~ NA_real_  # no opinion
       ),
 
-      piat_exp_pol_relationslegal = coalesce(
-        case_when(
-          grab(pick(everything()), "relationslegal_3num") == 1 ~ 0,
-          grab(pick(everything()), "relationslegal_3num") == 2 ~ 1,
-          grab(pick(everything()), "relationslegal_3num") == 3 ~ NA_real_
-        ),
-        case_when(
-          grab(pick(everything()), "relationslegal_3") == 0 ~ 1,
-          grab(pick(everything()), "relationslegal_3") == 1 ~ 0,
-          grab(pick(everything()), "relationslegal_3") == 2 ~ NA_real_
-        )
+      iat_sex_exp_pol_legal = case_when(
+        grab(pick(everything()), "relationslegal_3num") == 1 ~ 0,
+        grab(pick(everything()), "relationslegal_3num") == 2 ~ 1,
+        grab(pick(everything()), "relationslegal_3num") == 3 ~ NA_real_
       ),
 
-      piat_exp_pol_adoptchild = case_when(
+      iat_sex_exp_pol_adopt = case_when(
         grab(pick(everything()), "adoptchild") == 1 ~ 0,
         grab(pick(everything()), "adoptchild") == 2 ~ 1,
         grab(pick(everything()), "adoptchild") == 3 ~ NA_real_
       ),
 
-      piat_exp_pol_serverights = case_when(
-        grab(pick(everything()), "serverights") == 1 ~ 1,
+      iat_sex_exp_pol_serv  = case_when(
+        grab(pick(everything()), "serverights") == 1 ~ 1,   # support refusal
         grab(pick(everything()), "serverights") == 2 ~ 0,
         grab(pick(everything()), "serverights") == 3 ~ NA_real_
       ),
 
-      piat_exp_pol_transgender = case_when(
-        grab(pick(everything()), "transgender") == 1 ~ 1,
+      iat_sex_exp_pol_trans = case_when(
+        grab(pick(everything()), "transgender") == 1 ~ 1,   # oppose trans bathroom
         grab(pick(everything()), "transgender") == 2 ~ 0
-      ),
-
-      # Explicit: Belief -------------------------------------------------------
-      piat_exp_bel_sexorigin = grab(pick(everything()), "sexualityorigin")
+      )
     ) |>
     group_by(year, state) |>
     summarise(
-      # Counts FIRST — outputs to n_{.col} so original column names are preserved
+      # Counts FIRST — named iat_sex_n_{item} to follow AAA_BBB_CCC convention
       across(
-        c(piat_imp_straight_good,
-          piat_exp_att_straight_pref,
-          piat_exp_therm_gaymen, piat_exp_therm_gaywomen,
-          piat_exp_pol_marriagerights, piat_exp_pol_relationslegal,
-          piat_exp_pol_adoptchild, piat_exp_pol_serverights,
-          piat_exp_pol_transgender,
-          piat_exp_bel_sexorigin),
+        c(iat_sex_imp_d,
+          iat_sex_exp_att,
+          iat_sex_exp_therm_gm, iat_sex_exp_therm_gw,
+          iat_sex_exp_pol_marr, iat_sex_exp_pol_legal,
+          iat_sex_exp_pol_adopt, iat_sex_exp_pol_serv,
+          iat_sex_exp_pol_trans),
         ~ sum(!is.na(.x)),
-        .names = "n_{.col}"
+        .names = "iat_sex_n_{sub('iat_sex_', '', .col)}"
       ),
-      # Means SECOND — now safe to overwrite column names with {.col}
+      # Means SECOND — safe to overwrite column names
       across(
-        c(piat_imp_straight_good,
-          piat_exp_att_straight_pref,
-          piat_exp_therm_gaymen, piat_exp_therm_gaywomen,
-          piat_exp_pol_marriagerights, piat_exp_pol_relationslegal,
-          piat_exp_pol_adoptchild, piat_exp_pol_serverights,
-          piat_exp_pol_transgender,
-          piat_exp_bel_sexorigin),
+        c(iat_sex_imp_d,
+          iat_sex_exp_att,
+          iat_sex_exp_therm_gm, iat_sex_exp_therm_gw,
+          iat_sex_exp_pol_marr, iat_sex_exp_pol_legal,
+          iat_sex_exp_pol_adopt, iat_sex_exp_pol_serv,
+          iat_sex_exp_pol_trans),
         ~ mean(.x, na.rm = TRUE),
         .names = "{.col}"
       ),
@@ -133,66 +129,46 @@ clean_one_year <- function(df) {
 }
 
 # ── Build item-level dataset ──────────────────────────────────────────────────
+# Contains individual item means AND their iat_sex_n_ counts
 iat_sexuality_items <- all_files |>
   map_dfr(clean_one_year)
 
 # ── Build composite-level dataset ─────────────────────────────────────────────
-# n_ columns: carry forward the smallest constituent n per composite
-# so that stigmaR()'s min_n filter has a conservative count to work with
+# Composite scores only — no respondent counts (those live in items)
 iat_sexuality_indices <- iat_sexuality_items |>
   mutate(
-    # Implicit -----------------------------------------------------------------
-    implicit = piat_imp_straight_good,
-    n_implicit = n_piat_imp_straight_good,
+    # Implicit -------------------------------------------------------------------
+    iat_sex_implicit       = iat_sex_imp_d,
 
-    # Explicit: Thermometer ----------------------------------------------------
-    explicit_therm = rowMeans(
-      pick(piat_exp_therm_gaymen, piat_exp_therm_gaywomen),
-      na.rm = TRUE
-    ),
-    n_explicit_therm = pmin(n_piat_exp_therm_gaymen, n_piat_exp_therm_gaywomen, na.rm = TRUE),
-
-    # Explicit: Policy ---------------------------------------------------------
-    explicit_pol = rowMeans(
-      pick(piat_exp_pol_marriagerights, piat_exp_pol_relationslegal,
-           piat_exp_pol_adoptchild,    piat_exp_pol_serverights,
-           piat_exp_pol_transgender),
-      na.rm = TRUE
-    ),
-    n_explicit_pol = pmin(
-      n_piat_exp_pol_marriagerights, n_piat_exp_pol_relationslegal,
-      n_piat_exp_pol_adoptchild,    n_piat_exp_pol_serverights,
-      n_piat_exp_pol_transgender,
+    # Explicit: Thermometer ------------------------------------------------------
+    iat_sex_explicit_therm = rowMeans(
+      pick(iat_sex_exp_therm_gm, iat_sex_exp_therm_gw),
       na.rm = TRUE
     ),
 
-    # Explicit: Belief ---------------------------------------------------------
-    explicit_bel = piat_exp_bel_sexorigin,
-    n_explicit_bel = n_piat_exp_bel_sexorigin,
-
-    # Explicit: Omnibus --------------------------------------------------------
-    explicit = rowMeans(
-      pick(piat_exp_therm_gaymen,      piat_exp_therm_gaywomen,
-           piat_exp_pol_marriagerights, piat_exp_pol_relationslegal,
-           piat_exp_pol_adoptchild,    piat_exp_pol_serverights,
-           piat_exp_pol_transgender,   piat_exp_bel_sexorigin),
+    # Explicit: Policy -----------------------------------------------------------
+    iat_sex_explicit_pol   = rowMeans(
+      pick(iat_sex_exp_pol_marr, iat_sex_exp_pol_legal,
+           iat_sex_exp_pol_adopt, iat_sex_exp_pol_serv,
+           iat_sex_exp_pol_trans),
       na.rm = TRUE
     ),
-    n_explicit = pmin(
-      n_piat_exp_therm_gaymen,      n_piat_exp_therm_gaywomen,
-      n_piat_exp_pol_marriagerights, n_piat_exp_pol_relationslegal,
-      n_piat_exp_pol_adoptchild,    n_piat_exp_pol_serverights,
-      n_piat_exp_pol_transgender,   n_piat_exp_bel_sexorigin,
+
+    # Explicit: Omnibus (therm + pol) -------------------------------------------
+    iat_sex_explicit       = rowMeans(
+      pick(iat_sex_exp_therm_gm,  iat_sex_exp_therm_gw,
+           iat_sex_exp_pol_marr,  iat_sex_exp_pol_legal,
+           iat_sex_exp_pol_adopt, iat_sex_exp_pol_serv,
+           iat_sex_exp_pol_trans),
       na.rm = TRUE
     )
   ) |>
   select(
     state, year,
-    implicit,       n_implicit,
-    explicit_therm, n_explicit_therm,
-    explicit_pol,   n_explicit_pol,
-    explicit_bel,   n_explicit_bel,
-    explicit,       n_explicit
+    iat_sex_implicit,
+    iat_sex_explicit_therm,
+    iat_sex_explicit_pol,
+    iat_sex_explicit
   )
 
 # ── Save ──────────────────────────────────────────────────────────────────────
@@ -200,4 +176,4 @@ saveRDS(iat_sexuality_items,   here("data/clean/iat_sexuality_items.Rds"))
 saveRDS(iat_sexuality_indices, here("data/clean/iat_sexuality_indices.Rds"))
 
 message("02_iat_sexuality.R complete: ",
-        nrow(iat_sexuality_items), " state-year rows written.")
+        nrow(iat_sexuality_items), " state-year rows written (2016–2025).")

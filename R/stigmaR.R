@@ -1,7 +1,8 @@
 #' Calculate State-Level Stigma Scores from IAT Data
 #'
 #' Merges state- and year-level stigma indices derived from Project Implicit
-#' IAT data into your dataset. New columns are added in the format `YYYY_index`.
+#' IAT data into your dataset. New columns are added in the format
+#' `YYYY_iat_sex_index`.
 #'
 #' @param df A data frame containing your data.
 #' @param state Character string. Name of the column in `df` containing
@@ -9,24 +10,23 @@
 #' @param index Character vector. One or more composite indices to merge in.
 #'   Options are:
 #'   \itemize{
-#'     \item `"implicit"`: IAT D-score (implicit pro-straight bias)
-#'     \item `"explicit_therm"`: Average of gay men + gay women feeling
-#'       thermometers (reversed so higher = more stigma)
-#'     \item `"explicit_pol"`: Average of policy opposition items (marriage
-#'       rights, relations legality, adoption, service refusal, transgender
-#'       bathroom)
-#'     \item `"explicit_bel"`: Belief that sexuality is environmental rather
-#'       than innate
-#'     \item `"explicit"`: Average across all explicit indices
-#'       (therm + pol + bel)
+#'     \item `"iat_sex_implicit"`: IAT D-score (implicit pro-straight bias;
+#'       higher = more stigma)
+#'     \item `"iat_sex_explicit_therm"`: Average of gay men + lesbian women
+#'       feeling thermometers (reversed so higher = more stigma)
+#'     \item `"iat_sex_explicit_pol"`: Average of policy opposition items
+#'       (marriage rights, relations legality, adoption, service refusal,
+#'       transgender bathroom)
+#'     \item `"iat_sex_explicit"`: Omnibus average across all explicit items
+#'       (therm + pol)
 #'   }
-#' @param year Character vector. Years to merge in (e.g., `c("2015", "2016")`).
-#'   Each year x index combination becomes one new column named `YYYY_index`.
-#' @param min_n Integer. Minimum IAT respondents required per state-year cell.
-#'   Cells below this threshold are set to NA. Default is 30.
+#' @param year Character vector. Years to merge in (e.g., `c("2016", "2017")`).
+#'   Each year x index combination becomes one new column named
+#'   `YYYY_iat_sex_index`. Data are available from 2016 onward.
 #'
-#' @return The input data frame with new columns named `YYYY_index` containing
-#'   matched state-level stigma scores for each requested year and index.
+#' @return The input data frame with new columns named `YYYY_iat_sex_index`
+#'   containing matched state-level stigma scores for each requested year
+#'   and index.
 #'
 #' @references
 #' Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing Accessibility,
@@ -42,14 +42,15 @@
 #' new_df <- stigmaR(
 #'   df    = my_data,
 #'   state = "state_abbrev",
-#'   index = c("implicit", "explicit_pol"),
-#'   year  = c("2015", "2016")
+#'   index = c("iat_sex_implicit", "iat_sex_explicit_pol"),
+#'   year  = c("2016", "2017")
 #' )
-#' # Adds columns: 2015_implicit, 2016_implicit, 2015_explicit_pol, 2016_explicit_pol
+#' # Adds columns: 2016_iat_sex_implicit, 2017_iat_sex_implicit,
+#' #               2016_iat_sex_explicit_pol, 2017_iat_sex_explicit_pol
 #' }
 #'
 #' @export
-stigmaR <- function(df, state, index, year, min_n = 30) {
+stigmaR <- function(df, state, index, year) {
 
   # ── Valid inputs ─────────────────────────────────────────────────────────────
   valid_states  <- c(
@@ -60,20 +61,10 @@ stigmaR <- function(df, state, index, year, min_n = 30) {
   )
 
   valid_indices <- c(
-    "implicit",
-    "explicit_therm",
-    "explicit_pol",
-    "explicit_bel",
-    "explicit"
-  )
-
-  # Each composite index maps to its corresponding n_ column in composite
-  n_col_map <- list(
-    implicit       = "n_implicit",
-    explicit_therm = "n_explicit_therm",
-    explicit_pol   = "n_explicit_pol",
-    explicit_bel   = "n_explicit_bel",
-    explicit       = "n_explicit"
+    "iat_sex_implicit",
+    "iat_sex_explicit_therm",
+    "iat_sex_explicit_pol",
+    "iat_sex_explicit"
   )
 
   # ── Input validation ─────────────────────────────────────────────────────────
@@ -118,7 +109,6 @@ stigmaR <- function(df, state, index, year, min_n = 30) {
   cat("  stigmaR: State-Level Structural Stigma Scores                \n")
   cat("================================================================\n")
   cat(sprintf("  stigmaR version : %s\n", packageVersion("stigmaR")))
-  cat(sprintf("  min_n           : %d respondents per state-year cell\n", min_n))
   cat(sprintf("  Indices         : %s\n", paste(index, collapse = ", ")))
   cat(sprintf("  Years           : %s\n", paste(year,  collapse = ", ")))
   cat("----------------------------------------------------------------\n")
@@ -151,14 +141,13 @@ stigmaR <- function(df, state, index, year, min_n = 30) {
 
   # ── Merge loop ────────────────────────────────────────────────────────────────
   cat("  COLUMNS ADDED:\n")
-  cat(sprintf("  %-28s  %-12s  %-10s  %s\n",
+  cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
               "Column", "Matched", "Unmatched", "Notes"))
-  cat(sprintf("  %s\n", strrep("-", 72)))
+  cat(sprintf("  %s\n", strrep("-", 76)))
 
   for (idx in index) {
 
-    score_col <- idx                  # composite column name in `composite`
-    n_col     <- n_col_map[[idx]]     # corresponding n_ column
+    score_col <- idx               # composite column name in `composite`
 
     for (yr in year) {
 
@@ -166,20 +155,16 @@ stigmaR <- function(df, state, index, year, min_n = 30) {
 
       # Year unavailable — all-NA column
       if (!yr %in% available_years) {
-        cat(sprintf("  %-28s  %-12s  %-10s  %s\n",
+        cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
                     new_col, "--", "--", "Year not in data; all NA"))
         df[[new_col]] <- NA_real_
         next
       }
 
-      # Filter reference to this year; apply min_n threshold
+      # Filter reference to this year
       ref_yr <- ref |>
         dplyr::filter(year == yr) |>
-        dplyr::mutate(
-          score = dplyr::if_else(.data[[n_col]] < min_n, NA_real_,
-                                 .data[[score_col]])
-        ) |>
-        dplyr::select(state, score)
+        dplyr::select(state, score = dplyr::all_of(score_col))
 
       # Coverage summary
       available_states <- ref_yr$state[!is.na(ref_yr$score)]
@@ -191,7 +176,7 @@ stigmaR <- function(df, state, index, year, min_n = 30) {
       else
         "OK"
 
-      cat(sprintf("  %-28s  %-12s  %-10s  %s\n",
+      cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
                   new_col,
                   paste0(length(matched), "/", length(valid_user_states)),
                   length(unmatched),

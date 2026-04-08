@@ -10,21 +10,21 @@ pacman::p_load(tidyverse, here)
 # ── Load cleaned source datasets ─────────────────────────────────────────────
 iat_sex_items   <- readRDS(here("data/clean/iat_sexuality_items.Rds"))
 iat_sex_indices <- readRDS(here("data/clean/iat_sexuality_indices.Rds"))
-# iat_race_items   <- readRDS(here("data/clean/iat_race_items.Rds"))
-# iat_race_indices <- readRDS(here("data/clean/iat_race_indices.Rds"))
-# map_items        <- readRDS(here("data/clean/map_items.Rds"))
-# map_indices      <- readRDS(here("data/clean/map_indices.Rds"))
+# iat_black_items   <- readRDS(here("data/clean/iat_race_items.Rds"))
+# iat_black_indices <- readRDS(here("data/clean/iat_race_indices.Rds"))
+# map_items         <- readRDS(here("data/clean/map_items.Rds"))
+# map_indices       <- readRDS(here("data/clean/map_indices.Rds"))
 
 # ── Merge all item-level sources ──────────────────────────────────────────────
 # full_join preserves all state-years even when a source lacks coverage
 items <- iat_sex_items
-# |> full_join(iat_race_items, by = c("state", "year"))
-# |> full_join(map_items,      by = c("state", "year"))
+# |> full_join(iat_black_items, by = c("state", "year"))
+# |> full_join(map_items,       by = c("state", "year"))
 
 # ── Merge all composite-level sources ────────────────────────────────────────
 composite <- iat_sex_indices
-# |> full_join(iat_race_indices, by = c("state", "year"))
-# |> full_join(map_indices,      by = c("state", "year"))
+# |> full_join(iat_black_indices, by = c("state", "year"))
+# |> full_join(map_indices,       by = c("state", "year"))
 
 # ── Validate ──────────────────────────────────────────────────────────────────
 stopifnot(
