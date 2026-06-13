@@ -7,7 +7,7 @@ The goal of stigmaR is to measure and calculate structural stigma.
 Have questions, ideas, or need help?
 
 [Join the discussion board
-→](https://github.com/follhim/stigmaR/discussions)
+→](https://github.com/orgs/stigmaRverse/discussions)
 
 ## Installation
 
@@ -15,6 +15,7 @@ You can install the development version of stigmaR from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("remotes")
-# remotes::install_github("follhim/stigmaR")
+
+install.packages("remotes")
+remotes::install_github("follhim/stigmaR")
 ```

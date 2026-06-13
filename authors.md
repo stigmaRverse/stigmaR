@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/follhim/stigmaR/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/stigmaRverse/stigmaR/blob/main/inst/CITATION)
 
 Kim S, Todd N (2027). *stigmaR: State-Level Structural Stigma Scores
 from IAT Data*. R package, <https://github.com/follhim/stigmaR>.

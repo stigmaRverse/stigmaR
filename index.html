@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Measuring and calculating structural stigma • stigmaR</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Measuring and calculating structural stigma">
-<meta name="description" content="Provides researchers with pre-computed, state-level structural stigma scores derived from Project Implicit's Implicit Association Test (IAT) public dataset. Users can merge sexuality-related stigma indices— including implicit bias, explicit attitudes, policy opposition, and belief items—into their own data frames using a single function call, with built-in coverage reporting and respondent-count filtering.">
-<meta property="og:description" content="Provides researchers with pre-computed, state-level structural stigma scores derived from Project Implicit's Implicit Association Test (IAT) public dataset. Users can merge sexuality-related stigma indices— including implicit bias, explicit attitudes, policy opposition, and belief items—into their own data frames using a single function call, with built-in coverage reporting and respondent-count filtering.">
+<meta name="description" content="Provides researchers with pre-computed, state-level structural stigma scores derived from publicly available data. Users can merge stigma indices—including implicit bias, explicit attitudes, policies, and belief items—into their own data frames using a single function call.">
+<meta property="og:description" content="Provides researchers with pre-computed, state-level structural stigma scores derived from publicly available data. Users can merge stigma indices—including implicit bias, explicit attitudes, policies, and belief items—into their own data frames using a single function call.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">stigmaR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,15 +38,15 @@
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="articles/roadmap.html">Roadmap</a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/follhim/stigmaR/discussions">Community &amp; Support</a></li>
 <li class="nav-item"><a class="nav-link" href="articles/about.html">About</a></li>
+<li class="nav-item"><a class="nav-link" href="articles/CHANGELOG.html">Changelog</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/follhim/stigmaR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/stigmaRverse/stigmaR/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -68,7 +68,7 @@
 Have questions, ideas, or need help?
 </p>
 <p style="margin-bottom: 0;">
-<a href="https://github.com/follhim/stigmaR/discussions" style="color: #2563eb; font-weight: 600; text-decoration: none;" class="external-link"> Join the discussion board → </a>
+<a href="https://github.com/orgs/stigmaRverse/discussions" style="color: #2563eb; font-weight: 600; text-decoration: none;" class="external-link"> Join the discussion board → </a>
 </p>
 </div>
 <div class="section level2">
@@ -76,15 +76,15 @@ Have questions, ideas, or need help?
 </h2>
 <p>You can install the development version of stigmaR from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="co"># remotes::install_github("follhim/stigmaR")</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"follhim/stigmaR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/follhim/stigmaR/" class="external-link">Browse source code</a></li>
-<li><a href="https://github.com/follhim/stigmaR/issues" class="external-link">Report a bug</a></li>
+<li><a href="https://github.com/stigmaRverse/stigmaR/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/stigmaRverse/stigmaR/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
