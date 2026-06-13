@@ -1,10 +1,10 @@
-url: https://follhim.github.io/stigmaR/
+url: https://stigmaRverse.github.io/stigmaR/
 template:
   bootstrap: 5
 
 navbar:
   structure:
-    left:  [intro, articles, roadmap, about, changelog, reference]
+    left:  [intro, articles, roadmap, about, news, reference]
     right: [search, github]
   components:
     articles:
@@ -21,7 +21,3 @@ navbar:
     about:
       text: About
       href: articles/about.html
-
-    changelog:
-      text: Changelog
-      href: articles/CHANGELOG.html
