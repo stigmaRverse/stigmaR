@@ -21,7 +21,7 @@ Have questions, ideas, or need help?
 
 <p style="margin-bottom: 0;">
 
-<a href="https://github.com/follhim/stigmaR/discussions" style="color: #2563eb; font-weight: 600; text-decoration: none;">
+<a href="https://github.com/orgs/stigmaRverse/discussions" style="color: #2563eb; font-weight: 600; text-decoration: none;">
 Join the discussion board → </a>
 </p>
 
@@ -33,6 +33,6 @@ You can install the development version of stigmaR from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("remotes")
-# remotes::install_github("follhim/stigmaR")
+install.packages("remotes")
+remotes::install_github("follhim/stigmaR")
 ```

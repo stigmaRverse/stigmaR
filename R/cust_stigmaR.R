@@ -1,49 +1,66 @@
-#' Calculate Structural Stigma Scores
+#' Build a Custom Sum-Score Composite Index
 #'
-#' Merges state- and year-level structural indices derived from publicly available data
-#' into your dataset. You can find all available indices in
-#' [stigmaRdata](stigmaRverse.github.io/stigmaRdata).
+#' Lets you combine individual items from the bundled `items` dataset into
+#' your own sum-score composite(s), merged into your data by state and year.
+#' Each composite is the row-wise sum of the items you choose, computed
+#' within a single year (you cannot mix items from different years into one
+#' composite). To merge individual items without combining them, see
+#' [item_stigmaR()].
 #'
 #' @param df A data frame containing your data.
 #' @param state Character string. Name of the column in `df` containing
 #'   two-letter state abbreviations (e.g., "IL", "CA").
-#' @param index Character vector. One or more composite indices to merge in.
-#'   The set of valid indices is determined automatically from the columns of
-#'   the bundled `composite` dataset (every column except `state` and `year`).
-#'   Examples include:
-#'   \itemize{
-#'     \item `"iat_sex_implicit"`: IAT D-score (implicit pro-straight bias;
-#'       higher = more stigma)
-#'     \item `"iat_sex_explicit_pol"`: Average of policy opposition items
-#'       (marriage rights, relations legality, adoption, service refusal,
-#'       transgender bathroom)
-#'   }
-#'   See `names(stigmaR::composite)` for the full, current list.
 #' @param year Character vector. Years to merge in (e.g., `c("2016", "2017")`).
-#'   Each year x index combination becomes one new column named
-#'   `YYYY_iat_sex_implicit` (as an exeample).
+#'   Each custom index is computed separately for each requested year and
+#'   added as a column named `YYYY_varname`.
+#' @param cust_index A character vector of item names to sum into a single
+#'   custom index, or a list of such character vectors to build multiple
+#'   custom indices at once. Valid item names are determined automatically
+#'   from the columns of the bundled `items` dataset (every `iat_sex_*` mean
+#'   column, excluding the `iat_sex_n_*` respondent-count columns). See
+#'   `names(stigmaR::items)` for the full, current list.
+#' @param var_name Character vector of names for the new column(s), one per
+#'   group in `cust_index` (i.e., `length(var_name)` must equal
+#'   `length(cust_index)`, or be `1` if `cust_index` is a single vector).
+#' @param na_rm Logical. If `FALSE` (default), a composite is `NA` for a
+#'   given state-year if *any* of its component items are `NA` for that
+#'   state-year. If `TRUE`, the composite is the sum of whatever component
+#'   items are non-missing (and `NA` only if *all* are missing).
 #'
-#' @return The input data frame with new columns named `YYYY_iat_sex_implicit`
-#'   containing matched state-level stigma scores for each requested year
-#'   and index.
+#' @return The input data frame with new columns named `YYYY_varname`
+#'   containing the summed custom index for each requested year and
+#'   `var_name`.
 #'
 #' @references
 #' Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing Accessibility,
 #' Reproducibility, and Transparency of Structural Stigma Research.
 #'
-#'
 #' @examples
 #' \dontrun{
-#' new_df <- stigmaR(
-#'   df    = my_data,
-#'   state = "state_abbrev",
-#'   index = c("iat_sex_implicit", "iat_sex_explicit_pol"),
-#'   year  = c("2016", "2017")
+#' # One custom index
+#' new_df <- cust_stigmaR(
+#'   df         = my_data,
+#'   state      = "state_abbrev",
+#'   year       = c("2016", "2017"),
+#'   cust_index = c("iat_sex_imp_d", "iat_sex_exp_therm_gm"),
+#'   var_name   = "my_custom_index"
+#' )
+#'
+#' # Multiple custom indices at once
+#' new_df <- cust_stigmaR(
+#'   df         = my_data,
+#'   state      = "state_abbrev",
+#'   year       = "2016",
+#'   cust_index = list(
+#'     c("iat_sex_imp_d", "iat_sex_exp_therm_gm"),
+#'     c("iat_sex_exp_pol_marr", "iat_sex_exp_pol_legal", "iat_sex_exp_pol_adopt")
+#'   ),
+#'   var_name   = c("implicit_plus_therm", "policy_sum")
 #' )
 #' }
 #'
 #' @export
-stigmaR <- function(df, state, index, year) {
+cust_stigmaR <- function(df, state, year, cust_index, var_name, na_rm = FALSE) {
   # ── Valid inputs ─────────────────────────────────────────────────────────────
   valid_states  <- c(
     "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN",
@@ -51,9 +68,21 @@ stigmaR <- function(df, state, index, year) {
     "NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT",
     "VT","VA","WA","WV","WI","WY"
   )
-  # Valid indices are read directly from `composite` so new indices added in
-  # stigmaRdata become usable without needing a code change here.
-  valid_indices <- setdiff(names(composite), c("state", "year"))
+  # Valid items are read directly from `items`, excluding state/year and the
+  # iat_sex_n_* respondent-count columns.
+  item_cols   <- setdiff(names(items), c("state", "year"))
+  valid_items <- item_cols[!startsWith(item_cols, "iat_sex_n_")]
+  # ── Normalize cust_index / var_name ─────────────────────────────────────────
+  if (!is.list(cust_index)) cust_index <- list(cust_index)
+  if (!is.character(var_name))
+    stop("`var_name` must be a character vector.")
+  if (length(var_name) != length(cust_index))
+    stop(paste0(
+      "`var_name` must have one name per group in `cust_index` ",
+      "(got ", length(var_name), " name(s) for ", length(cust_index), " group(s))."
+    ))
+  if (anyDuplicated(var_name) > 0)
+    stop("`var_name` values must be unique.")
   # ── Input validation ─────────────────────────────────────────────────────────
   if (!is.data.frame(df))
     stop("`df` must be a data frame.")
@@ -61,20 +90,28 @@ stigmaR <- function(df, state, index, year) {
     stop("`state` must be a single character string naming a column in `df`.")
   if (!state %in% names(df))
     stop(paste0("Column '", state, "' not found in `df`."))
-  if (!is.character(index) || length(index) == 0)
-    stop("`index` must be a non-empty character vector.")
   if (!is.character(year) || length(year) == 0)
     stop("`year` must be a non-empty character vector.")
-  bad_index <- setdiff(index, valid_indices)
-  if (length(bad_index) > 0)
-    stop(paste0(
-      "Invalid index value(s): ", paste(bad_index, collapse = ", "),
-      "\nMust be one of: ", paste(valid_indices, collapse = ", ")
-    ))
-  # ── Prepare composite reference data ─────────────────────────────────────────
+  if (!is.logical(na_rm) || length(na_rm) != 1 || is.na(na_rm))
+    stop("`na_rm` must be TRUE or FALSE.")
+  for (i in seq_along(cust_index)) {
+    grp <- cust_index[[i]]
+    if (!is.character(grp) || length(grp) == 0)
+      stop(paste0("`cust_index[[", i, "]]` must be a non-empty character vector of item names."))
+    bad_item <- setdiff(grp, valid_items)
+    if (length(bad_item) > 0)
+      stop(paste0(
+        "Invalid item value(s) in cust_index[[", i, "]]: ",
+        paste(bad_item, collapse = ", "),
+        "\nMust be one of: ", paste(valid_items, collapse = ", ")
+      ))
+    if (anyDuplicated(grp) > 0)
+      stop(paste0("`cust_index[[", i, "]]` contains duplicate item names."))
+  }
+  # ── Prepare items reference data ─────────────────────────────────────────────
   # as.character() on state strips haven <labelled> class from .sav-sourced data,
   # which would otherwise silently fail to match plain character state codes
-  ref <- composite |>
+  ref <- items |>
     dplyr::mutate(
       state = as.character(unclass(state)),
       year  = as.character(unclass(year))
@@ -88,11 +125,16 @@ stigmaR <- function(df, state, index, year) {
   # ── Header ───────────────────────────────────────────────────────────────────
   cat("\n")
   cat("================================================================\n")
-  cat("  stigmaR: State-Level Structural Stigma Scores                \n")
+  cat("  cust_stigmaR: Custom Sum-Score Composite Indices              \n")
   cat("================================================================\n")
   cat(sprintf("  stigmaR version : %s\n", packageVersion("stigmaR")))
-  cat(sprintf("  Indices         : %s\n", paste(index, collapse = ", ")))
-  cat(sprintf("  Years           : %s\n", paste(year,  collapse = ", ")))
+  for (i in seq_along(cust_index)) {
+    cat(sprintf("  %-15s : %s = sum(%s)\n",
+                if (i == 1) "Custom index(es)" else "",
+                var_name[i], paste(cust_index[[i]], collapse = " + ")))
+  }
+  cat(sprintf("  Years           : %s\n", paste(year, collapse = ", ")))
+  cat(sprintf("  na_rm           : %s\n", na_rm))
   cat("----------------------------------------------------------------\n")
   cat("  PLEASE CITE:\n")
   cat("  Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing\n")
@@ -123,10 +165,10 @@ stigmaR <- function(df, state, index, year) {
   cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
               "Column", "Matched", "Unmatched", "Notes"))
   cat(sprintf("  %s\n", strrep("-", 76)))
-  for (idx in index) {
-    score_col <- idx               # composite column name in `composite`
-    for (yr in year) {
-      new_col <- paste0(yr, "_", idx)
+  for (yr in year) {
+    for (i in seq_along(cust_index)) {
+      grp     <- cust_index[[i]]
+      new_col <- paste0(yr, "_", var_name[i])
       # Year unavailable — all-NA column
       if (!yr %in% available_years) {
         cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
@@ -134,10 +176,14 @@ stigmaR <- function(df, state, index, year) {
         df[[new_col]] <- NA_real_
         next
       }
-      # Filter reference to this year
+      # Filter reference to this year and sum the chosen items row-wise
       ref_yr <- ref |>
         dplyr::filter(year == yr) |>
-        dplyr::select(state, score = dplyr::all_of(score_col))
+        dplyr::select(state, dplyr::all_of(grp))
+      item_mat   <- as.matrix(dplyr::select(ref_yr, dplyr::all_of(grp)))
+      all_na     <- rowSums(!is.na(item_mat)) == 0
+      ref_yr$score <- rowSums(item_mat, na.rm = na_rm)
+      ref_yr$score[all_na] <- NA_real_
       # Coverage summary
       available_states <- ref_yr$state[!is.na(ref_yr$score)]
       matched          <- intersect(valid_user_states, available_states)

@@ -4,7 +4,7 @@ template:
 
 navbar:
   structure:
-    left:  [intro, articles, roadmap, community, about, reference]
+    left:  [intro, articles, roadmap, about, changelog, reference]
     right: [search, github]
   components:
     articles:
@@ -22,6 +22,6 @@ navbar:
       text: About
       href: articles/about.html
 
-    community:
-      text: Community & Support
-      href: https://github.com/follhim/stigmaR/discussions
+    changelog:
+      text: Changelog
+      href: articles/CHANGELOG.html

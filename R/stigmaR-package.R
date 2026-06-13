@@ -10,6 +10,13 @@
 ## usethis namespace: end
 NULL
 
+# `composite` and `items` are lazy-loaded package datasets (see R/data.R)
+# referenced directly inside stigmaR(), item_stigmaR(), and cust_stigmaR().
+# Declare them here so R CMD check doesn't flag them as undefined globals.
+if (getRversion() >= "2.15.1") {
+  utils::globalVariables(c("composite", "items"))
+}
+
 .onAttach <- function(libname, pkgname) {
   packageStartupMessage(
     "\nPlease cite:",

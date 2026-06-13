@@ -1,49 +1,48 @@
-#' Calculate Structural Stigma Scores
+#' Calculate State-Level Individual Item Scores
 #'
-#' Merges state- and year-level structural indices derived from publicly available data
-#' into your dataset. You can find all available indices in
-#' [stigmaRdata](stigmaRverse.github.io/stigmaRdata).
+#' Merges state- and year-level *individual item* scores - the building
+#' blocks behind the composite indices in [stigmaR()] - into your dataset.
+#' Use this when you want full flexibility to work with individual items
+#' (e.g., to build and compare your own composites). To create a single
+#' summed composite column directly, see [cust_stigmaR()].
 #'
 #' @param df A data frame containing your data.
 #' @param state Character string. Name of the column in `df` containing
 #'   two-letter state abbreviations (e.g., "IL", "CA").
-#' @param index Character vector. One or more composite indices to merge in.
-#'   The set of valid indices is determined automatically from the columns of
-#'   the bundled `composite` dataset (every column except `state` and `year`).
-#'   Examples include:
-#'   \itemize{
-#'     \item `"iat_sex_implicit"`: IAT D-score (implicit pro-straight bias;
-#'       higher = more stigma)
-#'     \item `"iat_sex_explicit_pol"`: Average of policy opposition items
-#'       (marriage rights, relations legality, adoption, service refusal,
-#'       transgender bathroom)
-#'   }
-#'   See `names(stigmaR::composite)` for the full, current list.
+#' @param item Character vector. One or more individual items to merge in.
+#'   The set of valid items is determined automatically from the columns of
+#'   the bundled `items` dataset (every `iat_sex_*` mean column, excluding
+#'   the `iat_sex_n_*` respondent-count columns). See
+#'   `names(stigmaR::items)` for the full, current list.
 #' @param year Character vector. Years to merge in (e.g., `c("2016", "2017")`).
-#'   Each year x index combination becomes one new column named
-#'   `YYYY_iat_sex_implicit` (as an exeample).
+#'   Each year x item combination becomes one new column named
+#'   `YYYY_itemname` (as an example).
 #'
-#' @return The input data frame with new columns named `YYYY_iat_sex_implicit`
-#'   containing matched state-level stigma scores for each requested year
-#'   and index.
+#' @return The input data frame with new columns named `YYYY_itemname`
+#'   containing matched state-level item scores for each requested year and
+#'   item.
+#'
+#' @details
+#' To keep merges manageable, a single call is limited to 100 new columns
+#' (i.e., `length(item) * length(year)`). If you need more than that, split
+#' the request into multiple calls.
 #'
 #' @references
 #' Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing Accessibility,
 #' Reproducibility, and Transparency of Structural Stigma Research.
 #'
-#'
 #' @examples
 #' \dontrun{
-#' new_df <- stigmaR(
+#' new_df <- item_stigmaR(
 #'   df    = my_data,
 #'   state = "state_abbrev",
-#'   index = c("iat_sex_implicit", "iat_sex_explicit_pol"),
+#'   item  = c("iat_sex_imp_d", "iat_sex_exp_therm_gm"),
 #'   year  = c("2016", "2017")
 #' )
 #' }
 #'
 #' @export
-stigmaR <- function(df, state, index, year) {
+item_stigmaR <- function(df, state, item, year) {
   # ── Valid inputs ─────────────────────────────────────────────────────────────
   valid_states  <- c(
     "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN",
@@ -51,9 +50,10 @@ stigmaR <- function(df, state, index, year) {
     "NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT",
     "VT","VA","WA","WV","WI","WY"
   )
-  # Valid indices are read directly from `composite` so new indices added in
-  # stigmaRdata become usable without needing a code change here.
-  valid_indices <- setdiff(names(composite), c("state", "year"))
+  # Valid items are read directly from `items`, excluding state/year and the
+  # iat_sex_n_* respondent-count columns.
+  item_cols   <- setdiff(names(items), c("state", "year"))
+  valid_items <- item_cols[!startsWith(item_cols, "iat_sex_n_")]
   # ── Input validation ─────────────────────────────────────────────────────────
   if (!is.data.frame(df))
     stop("`df` must be a data frame.")
@@ -61,20 +61,29 @@ stigmaR <- function(df, state, index, year) {
     stop("`state` must be a single character string naming a column in `df`.")
   if (!state %in% names(df))
     stop(paste0("Column '", state, "' not found in `df`."))
-  if (!is.character(index) || length(index) == 0)
-    stop("`index` must be a non-empty character vector.")
+  if (!is.character(item) || length(item) == 0)
+    stop("`item` must be a non-empty character vector.")
   if (!is.character(year) || length(year) == 0)
     stop("`year` must be a non-empty character vector.")
-  bad_index <- setdiff(index, valid_indices)
-  if (length(bad_index) > 0)
+  bad_item <- setdiff(item, valid_items)
+  if (length(bad_item) > 0)
     stop(paste0(
-      "Invalid index value(s): ", paste(bad_index, collapse = ", "),
-      "\nMust be one of: ", paste(valid_indices, collapse = ", ")
+      "Invalid item value(s): ", paste(bad_item, collapse = ", "),
+      "\nMust be one of: ", paste(valid_items, collapse = ", ")
     ))
-  # ── Prepare composite reference data ─────────────────────────────────────────
+  # ── Reasonable size limit ───────────────────────────────────────────────────
+  max_cols <- 100
+  n_new_cols <- length(item) * length(year)
+  if (n_new_cols > max_cols)
+    stop(paste0(
+      "This request would create ", n_new_cols, " new column(s) ",
+      "(length(item) x length(year)), which exceeds the limit of ", max_cols, ".\n",
+      "Reduce the number of items/years, or split the request into multiple calls."
+    ))
+  # ── Prepare items reference data ─────────────────────────────────────────────
   # as.character() on state strips haven <labelled> class from .sav-sourced data,
   # which would otherwise silently fail to match plain character state codes
-  ref <- composite |>
+  ref <- items |>
     dplyr::mutate(
       state = as.character(unclass(state)),
       year  = as.character(unclass(year))
@@ -88,11 +97,11 @@ stigmaR <- function(df, state, index, year) {
   # ── Header ───────────────────────────────────────────────────────────────────
   cat("\n")
   cat("================================================================\n")
-  cat("  stigmaR: State-Level Structural Stigma Scores                \n")
+  cat("  item_stigmaR: State-Level Individual Item Scores             \n")
   cat("================================================================\n")
   cat(sprintf("  stigmaR version : %s\n", packageVersion("stigmaR")))
-  cat(sprintf("  Indices         : %s\n", paste(index, collapse = ", ")))
-  cat(sprintf("  Years           : %s\n", paste(year,  collapse = ", ")))
+  cat(sprintf("  Items           : %s\n", paste(item, collapse = ", ")))
+  cat(sprintf("  Years           : %s\n", paste(year, collapse = ", ")))
   cat("----------------------------------------------------------------\n")
   cat("  PLEASE CITE:\n")
   cat("  Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing\n")
@@ -123,10 +132,9 @@ stigmaR <- function(df, state, index, year) {
   cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
               "Column", "Matched", "Unmatched", "Notes"))
   cat(sprintf("  %s\n", strrep("-", 76)))
-  for (idx in index) {
-    score_col <- idx               # composite column name in `composite`
+  for (it in item) {
     for (yr in year) {
-      new_col <- paste0(yr, "_", idx)
+      new_col <- paste0(yr, "_", it)
       # Year unavailable — all-NA column
       if (!yr %in% available_years) {
         cat(sprintf("  %-32s  %-12s  %-10s  %s\n",
@@ -137,7 +145,7 @@ stigmaR <- function(df, state, index, year) {
       # Filter reference to this year
       ref_yr <- ref |>
         dplyr::filter(year == yr) |>
-        dplyr::select(state, score = dplyr::all_of(score_col))
+        dplyr::select(state, score = dplyr::all_of(it))
       # Coverage summary
       available_states <- ref_yr$state[!is.na(ref_yr$score)]
       matched          <- intersect(valid_user_states, available_states)

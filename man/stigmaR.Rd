@@ -2,7 +2,7 @@
 % Please edit documentation in R/stigmaR.R
 \name{stigmaR}
 \alias{stigmaR}
-\title{Calculate State-Level Stigma Scores from IAT Data}
+\title{Calculate Structural Stigma Scores}
 \usage{
 stigmaR(df, state, index, year)
 }
@@ -13,32 +13,31 @@ stigmaR(df, state, index, year)
 two-letter state abbreviations (e.g., "IL", "CA").}
 
 \item{index}{Character vector. One or more composite indices to merge in.
-Options are:
+The set of valid indices is determined automatically from the columns of
+the bundled \code{composite} dataset (every column except \code{state} and \code{year}).
+Examples include:
 \itemize{
 \item \code{"iat_sex_implicit"}: IAT D-score (implicit pro-straight bias;
 higher = more stigma)
-\item \code{"iat_sex_explicit_therm"}: Average of gay men + lesbian women
-feeling thermometers (reversed so higher = more stigma)
 \item \code{"iat_sex_explicit_pol"}: Average of policy opposition items
 (marriage rights, relations legality, adoption, service refusal,
 transgender bathroom)
-\item \code{"iat_sex_explicit"}: Omnibus average across all explicit items
-(therm + pol)
-}}
+}
+See \code{names(stigmaR::composite)} for the full, current list.}
 
 \item{year}{Character vector. Years to merge in (e.g., \code{c("2016", "2017")}).
 Each year x index combination becomes one new column named
-\code{YYYY_iat_sex_index}. Data are available from 2016 onward.}
+\code{YYYY_iat_sex_implicit} (as an exeample).}
 }
 \value{
-The input data frame with new columns named \code{YYYY_iat_sex_index}
+The input data frame with new columns named \code{YYYY_iat_sex_implicit}
 containing matched state-level stigma scores for each requested year
 and index.
 }
 \description{
-Merges state- and year-level stigma indices derived from Project Implicit
-IAT data into your dataset. New columns are added in the format
-\code{YYYY_iat_sex_index}.
+Merges state- and year-level structural indices derived from publicly available data
+into your dataset. You can find all available indices in
+\href{stigmaRverse.github.io/stigmaRdata}{stigmaRdata}.
 }
 \examples{
 \dontrun{
@@ -48,17 +47,10 @@ new_df <- stigmaR(
   index = c("iat_sex_implicit", "iat_sex_explicit_pol"),
   year  = c("2016", "2017")
 )
-# Adds columns: 2016_iat_sex_implicit, 2017_iat_sex_implicit,
-#               2016_iat_sex_explicit_pol, 2017_iat_sex_explicit_pol
 }
 
 }
 \references{
 Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing Accessibility,
 Reproducibility, and Transparency of Structural Stigma Research.
-
-Greenwald, A. G., Nosek, B. A., & Banaji, M. R. (2003). Understanding
-and using the Implicit Association Test: I. An improved scoring algorithm.
-\emph{Journal of Personality and Social Psychology}, 85(2), 197–216.
-https://doi.org/10.1037/0022-3514.85.2.197
 }

@@ -8,11 +8,8 @@
 ^LICENSE\.md$
 ^\.github$
 
-# Data processing pipeline (scripts only; composite.rda and items.rda ARE included)
-^data/process$
-^data/raw$
-^data/clean$
-^data/final$
+# Data update script (not part of package; composite.rda and items.rda ARE included)
+^data-raw$
 
 # Project documentation (not part of package)
 ^codebook$

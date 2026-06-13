@@ -5,19 +5,24 @@
 \alias{stigmaR-package}
 \title{stigmaR: Measuring and calculating structural stigma}
 \description{
-Provides researchers with pre-computed, state-level structural stigma scores derived from Project Implicit's Implicit Association Test (IAT) public dataset. Users can merge sexuality-related stigma indices— including implicit bias, explicit attitudes, policy opposition, and belief items—into their own data frames using a single function call, with built-in coverage reporting and respondent-count filtering.
+Provides researchers with pre-computed, state-level structural stigma scores derived from publicly available data. Users can merge stigma indices—including implicit bias, explicit attitudes, policies, and belief items—into their own data frames using a single function call.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/follhim/stigmaR}
-  \item \url{https://follhim.github.io/stigmaR/}
-  \item Report bugs at \url{https://github.com/follhim/stigmaR/issues}
+  \item \url{https://github.com/stigmaRverse/stigmaR}
+  \item \url{https://stigmaRverse.github.io/stigmaR/}
+  \item Report bugs at \url{https://github.com/stigmaRverse/stigmaR/issues}
 }
 
 }
 \author{
 \strong{Maintainer}: Seungju Kim \email{follhim@gmail.com}
+
+Authors:
+\itemize{
+  \item Seungju Kim \email{follhim@gmail.com}
+}
 
 }
 \keyword{internal}

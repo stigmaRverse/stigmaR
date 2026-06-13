@@ -1,22 +1,20 @@
 Package: stigmaR
 Title: Measuring and calculating structural stigma
-Version: 0.0.0.10
+Version: 0.1.0
 Authors@R: 
     person("Seungju", "Kim", , "follhim@gmail.com", role = c("aut", "cre"))
 Description: Provides researchers with pre-computed, state-level structural
-    stigma scores derived from Project Implicit's Implicit Association Test
-    (IAT) public dataset. Users can merge sexuality-related stigma indices—
-    including implicit bias, explicit attitudes, policy opposition, and belief
-    items—into their own data frames using a single function call, with
-    built-in coverage reporting and respondent-count filtering.
+    stigma scores derived from publicly available data. Users can merge 
+    stigma indices—including implicit bias, explicit attitudes, policies, and belief items—into their own data frames 
+    using a single function call.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
-URL: https://github.com/follhim/stigmaR, https://follhim.github.io/stigmaR/
-BugReports: https://github.com/follhim/stigmaR/issues
-Depends: 
-    R (>= 3.5)
+URL: https://github.com/stigmaRverse/stigmaR, https://stigmaRverse.github.io/stigmaR/
+BugReports: https://github.com/stigmaRverse/stigmaR/issues
+Depends:
+    R (>= 4.1.0)
 Imports: 
     dplyr
 LazyData: true
+Config/roxygen2/version: 8.0.0
