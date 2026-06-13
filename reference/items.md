@@ -2,11 +2,11 @@
 
 State- and year-level individual item means and respondent counts
 underlying the composite indices in
-[composite](https://follhim.github.io/stigmaR/reference/composite.md).
+[composite](https://stigmaRverse.github.io/stigmaR/reference/composite.md).
 Used internally by
-[`item_stigmaR()`](https://follhim.github.io/stigmaR/reference/item_stigmaR.md)
+[`item_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/item_stigmaR.md)
 and
-[`cust_stigmaR()`](https://follhim.github.io/stigmaR/reference/cust_stigmaR.md).
+[`cust_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/cust_stigmaR.md).
 
 ## Usage
 

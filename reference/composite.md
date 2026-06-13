@@ -3,7 +3,7 @@
 State- and year-level composite (pre-averaged) structural stigma indices
 derived from Project Implicit IAT data, covering the 50 US states and DC
 from 2016 onward. Used internally by
-[`stigmaR()`](https://follhim.github.io/stigmaR/reference/stigmaR.md).
+[`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md).
 
 ## Usage
 

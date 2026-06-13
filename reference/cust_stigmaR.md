@@ -6,7 +6,7 @@ year. Each composite is the row-wise sum of the items you choose,
 computed within a single year (you cannot mix items from different years
 into one composite). To merge individual items without combining them,
 see
-[`item_stigmaR()`](https://follhim.github.io/stigmaR/reference/item_stigmaR.md).
+[`item_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/item_stigmaR.md).
 
 ## Usage
 

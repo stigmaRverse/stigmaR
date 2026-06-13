@@ -2,7 +2,7 @@
 
 Merges state- and year-level structural indices derived from publicly
 available data into your dataset. You can find all available indices in
-[stigmaRdata](https://follhim.github.io/stigmaR/reference/stigmaRverse.github.io/stigmaRdata).
+[stigmaRdata](https://stigmaRverse.github.io/stigmaR/reference/stigmaRverse.github.io/stigmaRdata).
 
 ## Usage
 

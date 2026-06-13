@@ -2,11 +2,11 @@
 
 Merges state- and year-level *individual item* scores - the building
 blocks behind the composite indices in
-[`stigmaR()`](https://follhim.github.io/stigmaR/reference/stigmaR.md) -
+[`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md) -
 into your dataset. Use this when you want full flexibility to work with
 individual items (e.g., to build and compare your own composites). To
 create a single summed composite column directly, see
-[`cust_stigmaR()`](https://follhim.github.io/stigmaR/reference/cust_stigmaR.md).
+[`cust_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/cust_stigmaR.md).
 
 ## Usage
 
