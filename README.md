@@ -34,5 +34,5 @@ You can install the development version of stigmaR from
 
 ``` r
 install.packages("remotes")
-remotes::install_github("follhim/stigmaR")
+remotes::install_github("stigmaRverse/stigmaR")
 ```
