@@ -1,3 +1,6 @@
+project:
+  render: ['*.qmd']
+
 url: https://stigmaRverse.github.io/stigmaR/
 template:
   bootstrap: 5

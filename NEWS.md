@@ -1,4 +1,4 @@
-# stigmaR 0.1.0
+## Version 0.1.0 (2026-06-15)
 
 * Added IAT-sexuality composite indices to `stigmaR()`.
 * Added `item_stigmaR()` for merging individual item scores.
