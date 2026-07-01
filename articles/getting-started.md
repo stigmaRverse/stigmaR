@@ -1,0 +1,246 @@
+# Getting Started with stigmaR
+
+## Overview
+
+`stigmaR` gives researchers pre-computed, state-level structural stigma
+scores derived from Project Implicit IAT data. The package’s three
+functions each merge scores into your existing dataframe by matching on
+state abbreviation and year.
+
+| Function | What it adds |
+|----|----|
+| [`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md) | Pre-averaged composite indices |
+| [`item_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/item_stigmaR.md) | Individual item scores |
+| [`cust_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/cust_stigmaR.md) | Your own sum-score composite built from individual items |
+
+All scores cover 50 US states + DC from 2016 onward.
+
+------------------------------------------------------------------------
+
+## Installation
+
+``` r
+
+# Install from GitHub
+remotes::install_github("stigmaRverse/stigmaR")
+```
+
+``` r
+
+library(stigmaR)
+```
+
+------------------------------------------------------------------------
+
+## Your data requirements
+
+Your dataframe needs one column with two-letter state abbreviations
+(e.g., `"IL"`, `"CA"`). Everything else is up to you — participants,
+outcomes, covariates, etc.
+
+The package ships a small test dataset (`data/test_data.xlsx`) with a
+`state` column and a `person` ID. We’ll use it throughout these
+examples:
+
+``` r
+
+library(readxl)
+my_data <- read_excel("data/test_data.xlsx")[ , c("state", "person")]
+head(my_data)
+#>   state  person
+#> 1    TX       1
+#> 2    CA       1
+#> 3    IL       1
+#> 4    AL       1
+#> 5    GA       1
+#> 6    TN       1
+```
+
+------------------------------------------------------------------------
+
+## `stigmaR()` — Composite indices
+
+[`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md)
+merges one or more pre-averaged composite indices. Each combination of
+year × index becomes a new column named `YYYY_indexname`.
+
+``` r
+
+my_data <- stigmaR(
+  df    = my_data,
+  state = "state",
+  index = c("iat_sex_implicit", "iat_sex_explicit_pol"),
+  year  = c("2019", "2020")
+)
+```
+
+This adds four columns: `2019_iat_sex_implicit`,
+`2020_iat_sex_implicit`, `2019_iat_sex_explicit_pol`, and
+`2020_iat_sex_explicit_pol`.
+
+The function prints a coverage table so you can see how many of your
+states matched data for each column.
+
+**Available indices** (see also `names(stigmaR::composite)`):
+
+- `"iat_sex_implicit"` — IAT D-score (implicit pro-straight bias; higher
+  = more stigma)
+- `"iat_sex_explicit_therm"` — Mean of gay men + lesbian women feeling
+  thermometers (reversed)
+- `"iat_sex_explicit_pol"` — Mean of five policy opposition items
+- `"iat_sex_explicit"` — Omnibus mean across all explicit items
+
+------------------------------------------------------------------------
+
+## `item_stigmaR()` — Individual items
+
+[`item_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/item_stigmaR.md)
+works identically to
+[`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md)
+but merges raw individual items instead of composites. Use this when you
+want to inspect or analyze items separately before combining them.
+
+``` r
+
+my_data <- item_stigmaR(
+  df    = my_data,
+  state = "state",
+  item  = c("iat_sex_imp_d", "iat_sex_exp_therm_gm", "iat_sex_exp_pol_marr"),
+  year  = "2020"
+)
+```
+
+This adds `2020_iat_sex_imp_d`, `2020_iat_sex_exp_therm_gm`, and
+`2020_iat_sex_exp_pol_marr`.
+
+A single call is capped at 100 new columns
+(`length(item) × length(year)`) to prevent accidental blowups — split
+larger requests into multiple calls.
+
+**All available items** (see also `names(stigmaR::items)`):
+
+| Item name               | Description                                  |
+|-------------------------|----------------------------------------------|
+| `iat_sex_imp_d`         | IAT D-score                                  |
+| `iat_sex_exp_att`       | Explicit attitude (7-point scale)            |
+| `iat_sex_exp_therm_gm`  | Gay men feeling thermometer (reversed)       |
+| `iat_sex_exp_therm_gw`  | Lesbian women feeling thermometer (reversed) |
+| `iat_sex_exp_pol_marr`  | Marriage rights opposition                   |
+| `iat_sex_exp_pol_legal` | Relations legality opposition                |
+| `iat_sex_exp_pol_adopt` | Adoption opposition                          |
+| `iat_sex_exp_pol_serv`  | Service refusal support                      |
+| `iat_sex_exp_pol_trans` | Transgender bathroom opposition              |
+
+Respondent counts for each item are stored in parallel `iat_sex_n_*`
+columns in the `items` dataset (e.g., `iat_sex_n_imp_d`) if you want to
+apply your own sample-size thresholds.
+
+------------------------------------------------------------------------
+
+## `cust_stigmaR()` — Custom composites
+
+[`cust_stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/cust_stigmaR.md)
+lets you define your own sum-score composite(s) from individual items.
+Scores are summed row-wise within each year; items cannot be mixed
+across years within one composite.
+
+### Single composite
+
+``` r
+
+my_data <- cust_stigmaR(
+  df         = my_data,
+  state      = "state",
+  year       = c("2019", "2020"),
+  cust_index = c("iat_sex_imp_d", "iat_sex_exp_therm_gm"),
+  var_name   = "implicit_plus_therm"
+)
+# Adds: 2019_implicit_plus_therm, 2020_implicit_plus_therm
+```
+
+### Multiple composites at once
+
+Pass a list to `cust_index`, with one name per group in `var_name`:
+
+``` r
+
+my_data <- cust_stigmaR(
+  df         = my_data,
+  state      = "state",
+  year       = "2020",
+  cust_index = list(
+    c("iat_sex_imp_d", "iat_sex_exp_att"),
+    c("iat_sex_exp_pol_marr", "iat_sex_exp_pol_legal",
+      "iat_sex_exp_pol_adopt", "iat_sex_exp_pol_serv",
+      "iat_sex_exp_pol_trans")
+  ),
+  var_name = c("implicit_explicit_sum", "policy_sum")
+)
+# Adds: 2020_implicit_explicit_sum, 2020_policy_sum
+```
+
+### Handling missing items (`na_rm`)
+
+By default (`na_rm = FALSE`), the composite is `NA` for a state-year if
+*any* component item is missing. Set `na_rm = TRUE` to sum whatever is
+available instead:
+
+``` r
+
+my_data <- cust_stigmaR(
+  df         = my_data,
+  state      = "state",
+  year       = "2020",
+  cust_index = c("iat_sex_imp_d", "iat_sex_exp_att"),
+  var_name   = "my_sum",
+  na_rm      = TRUE   # sum non-missing items; NA only if ALL items are missing
+)
+```
+
+------------------------------------------------------------------------
+
+## Output column naming
+
+All three functions use the same naming convention: `YYYY_indexname` (or
+`YYYY_itemname` / `YYYY_varname`). This makes it easy to reference a
+specific year’s score while keeping multiple years in the same wide
+dataframe.
+
+``` r
+
+# Reference specific year columns directly
+my_data$`2020_iat_sex_implicit`
+my_data[["2020_iat_sex_explicit_pol"]]
+```
+
+------------------------------------------------------------------------
+
+## Citation
+
+When using stigmaR, please cite:
+
+``` r
+
+citation("stigmaR")
+```
+
+Kim, S. & Todd, N. R. (2027). stigmaR: Enhancing Accessibility,
+Reproducibility, and Transparency of Structural Stigma Research.
+
+Greenwald, A. G., Nosek, B. A., & Banaji, M. R. (2003). Understanding
+and using the Implicit Association Test. *Journal of Personality and
+Social Psychology, 85*(2), 197–216.
+https://doi.org/10.1037/0022-3514.85.2.197
+
+------------------------------------------------------------------------
+
+## Further resources
+
+- Full data documentation:
+  [stigmaRdata](https://stigmaRverse.github.io/stigmaRdata)
+- Package reference:
+  [`?stigmaR`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md),
+  [`?item_stigmaR`](https://stigmaRverse.github.io/stigmaR/reference/item_stigmaR.md),
+  [`?cust_stigmaR`](https://stigmaRverse.github.io/stigmaR/reference/cust_stigmaR.md)
+- Available columns at any time: `names(stigmaR::composite)`,
+  `names(stigmaR::items)`

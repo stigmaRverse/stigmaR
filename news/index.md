@@ -1,6 +1,6 @@
 # Changelog
 
-## stigmaR 0.1.0
+## Version 0.1.0 (2026-06-15)
 
 - Added IAT-sexuality composite indices to
   [`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md).

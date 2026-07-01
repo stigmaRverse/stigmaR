@@ -35,3 +35,9 @@ remotes::install_github("stigmaRverse/stigmaR")
 - [`stigmaR()`](https://stigmaRverse.github.io/stigmaR/reference/stigmaR.md)
   : Calculate Structural Stigma Scores
 
+# Articles
+
+### All vignettes
+
+- [Getting Started with
+  stigmaR](https://stigmaRverse.github.io/stigmaR/articles/getting-started.md):
